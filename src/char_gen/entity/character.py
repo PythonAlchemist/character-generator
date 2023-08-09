@@ -1,8 +1,11 @@
 from typing import Union
 from char_gen.base import Kanka
+from char_gen.entity.core import Entity
+from char_gen.utils import extract_human_readable_text
+import pandas as pd
 
 
-class Character:
+class Character(Entity):
     def __init__(self, id: Union[int, None] = None, props: dict = {}):
         self.id: Union[int, None] = None
         self.name: Union[str, None] = None
@@ -18,40 +21,39 @@ class Character:
         self.tags: Union[list, None] = None
 
         if id:
-            self.__existingCharacter(id)
+            self._existingEntity(id)
         else:
-            self.__newCharacter(props)
+            self._newEntity(props)
 
-    def __newCharacter(self, props: dict) -> None:
-        for k, v in props.items():
-            setattr(self, k, v)
+    def __repr__(self) -> str:
+        return f"Character: {self.name} \n Description: {self.description}"
 
-    def __existingCharacter(self, id: int) -> None:
-        self.id = id
-        resp = self.getCharacter(id)
-        for k, v in resp.items():
-            setattr(self, k, v)
+    def toDF(self) -> pd.DataFrame:
+        df = pd.DataFrame([self.__dict__])
+        return df
 
-    def __updateCharacter(self, props: dict) -> None:
-        for k, v in props.items():
-            setattr(self, k, v)
-
-    def getCharacter(self, id: int):
+    @staticmethod
+    def getEntity(id: int):
         resp = Kanka.get(f"characters/{id}")
         return resp
 
-    def getCharacterList(self):
+    @staticmethod
+    def getEntityList():
         resp = Kanka.get("characters")
         return resp
+
+    def promptPackage(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "title": self.title,
+            "age": self.age,
+            "sex": self.sex,
+            "is_dead": self.is_dead,
+            "organizations": self.organizations,
+        }
 
 
 if __name__ == "__main__":
     char1 = Character(id=1235133)
-    char2 = Character(
-        props={
-            "name": "Test",
-            "age": 100,
-            "description": "This is a test",
-        }
-    )
-    s = 6
+    a = 5

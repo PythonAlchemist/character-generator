@@ -1,16 +1,13 @@
-from typing import Union, List, Dict, Any
+from typing import Union
 from char_gen.base import Kanka
 from char_gen.entity.core import Entity
-from char_gen.entity.character import Character
-import pandas as pd
 
 
-class Organization(Entity):
+class Location(Entity):
     def __init__(self, id: Union[int, None] = None, props: dict = {}):
         self.id: Union[int, None] = None
         self.name: Union[str, None] = None
         self.description: Union[str, None] = None
-        self.members: List[Dict[str, Any]] = []
 
         if id:
             self._existingEntity(id)
@@ -19,20 +16,13 @@ class Organization(Entity):
 
     @staticmethod
     def getEntity(id: int):
-        resp = Kanka.get(f"organisations/{id}")
+        resp = Kanka.get(f"locations/{id}")
         return resp
 
     @staticmethod
     def getEntityList():
-        resp = Kanka.get("organisations")
+        resp = Kanka.get("locations")
         return resp
-
-    @staticmethod
-    def getAllMembers(id: int) -> List[Character]:
-        resp = Organization.getEntity(id)
-        members = [Character(id=member["character_id"]) for member in resp["members"]]
-
-        return members
 
     def promptPackage(self):
         return {
@@ -43,5 +33,5 @@ class Organization(Entity):
 
 
 if __name__ == "__main__":
-    org = Organization()
-    org.getAllMembers(237897)
+    loc = Location(1112563)
+    a = 6

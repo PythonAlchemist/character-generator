@@ -1,7 +1,27 @@
 import streamlit as st
 from src.char_gen.entity.character import Character
 from src.char_gen.entity.organization import Organization
+from src.char_gen.entity.location import Location
+import pandas as pd
 import os
+
+# load lists
+resp = Organization.getEntityList()
+org_map = {}
+for org in resp:
+    org_map[org["name"]] = org["id"]
+
+resp = Location.getEntityList()
+location_map = {}
+for location in resp:
+    location_map[location["name"]] = location["id"]
+
+# packet
+packet = {
+    "location": None,
+    "organization": None,
+    "prompt": None,
+}
 
 
 # Function to display and edit character details
@@ -20,30 +40,62 @@ def edit_character(char):
     char.location = st.text_input("Location", char.location)
 
 
-def get_org_list() -> dict:
-    resp = Organization.getOrgList()
-    org_map = {}
-    for org in resp:
-        org_map[org["name"]] = org["id"]
+def collect_pregen_data(org_sel, loc_sel):
+    members = []
+    members_resp = Organization.getAllMembers(org_map[org_sel]) if org_sel else []
+    for member in members_resp:
+        members.append(member)
 
-    return org_map
+    loc_json = Location(id=location_map[loc_sel]).promptPackage() if loc_sel else None
+    org_json = Organization(id=org_map[org_sel]).promptPackage() if org_sel else None
+    members_json = [member.promptPackage() for member in members]
+
+    return loc_json, org_json, members_json
 
 
 # Streamlit app
 def main():
+    pregen = False
+
     st.sidebar.title("Pregen Parameters")
 
-    org_map = get_org_list()
-    org_list = list(org_map.keys())
-
-    st.sidebar.multiselect(
+    # define organizations character is associated with
+    org_sel = st.sidebar.selectbox(
         "What Organizations is this character associated with?",
-        org_list,
+        list(org_map.keys()),
     )
+
+    # define locations character is associated with
+    loc_sel = st.sidebar.selectbox(
+        "What Locations is this character associated with?",
+        list(location_map.keys()),
+    )
+
+    # define prompt
+    text = st.sidebar.text_area(
+        "Prompt",
+        placeholder="This is your chance to inform the models about anything you want about the new character.",
+    )
+
+    if st.sidebar.button("Collect Pregen Data"):
+        (
+            packet["location"],
+            packet["organization"],
+            packet["prompt"],
+        ) = collect_pregen_data(org_sel, loc_sel)
+        pregen = True
 
     st.title("Character Generator")
 
     char = Character()
+
+    if pregen:
+        st.write("Organization Data:")
+        st.write(packet["organization"])
+        st.write("Location Data:")
+        st.write(packet["location"])
+        st.write("Prompt Data:")
+        st.write(packet["prompt"])
 
     # Check if the image file exists
     image_path = "character_image.jpg"
@@ -57,29 +109,6 @@ def main():
     if st.button("Update"):
         # TODO: Use the to update kanka
         st.write("Character Updated!")
-
-    st.write("Character Details:")
-    display_character(char)
-
-
-# Function to display character details
-def display_character(char):
-    # Check if the image file exists
-    image_path = "character_image.jpg"
-    if os.path.exists(image_path):
-        st.image(image_path, use_column_width=True)
-    else:
-        st.write("Image not found")
-
-    st.write(f"Name: {char.name}")
-    st.write(f"Age: {char.age}")
-    st.write(f"Description: {char.description}")
-    st.write(f"Title: {char.title}")
-    st.write(f"Type: {char.type}")
-    st.write(f"Sex: {char.sex}")
-    st.write(f"Race: {char.race}")
-    st.write(f"Family: {char.family}")
-    st.write(f"Location: {char.location}")
 
 
 if __name__ == "__main__":
