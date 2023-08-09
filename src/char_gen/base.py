@@ -2,7 +2,7 @@ import requests
 import json
 import os
 from dotenv import load_dotenv, find_dotenv
-from src.utils import safe_response
+from char_gen.utils import safe_response
 
 load_dotenv(find_dotenv())
 

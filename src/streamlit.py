@@ -20,25 +20,18 @@ def edit_character(char):
     char.location = st.text_input("Location", char.location)
 
 
-def get_org_list() -> dict:
+def get_org_list():
     resp = Organization.getOrgList()
-    org_map = {}
-    for org in resp:
-        org_map[org["name"]] = org["id"]
-
-    return org_map
+    return resp
 
 
 # Streamlit app
 def main():
     st.sidebar.title("Pregen Parameters")
 
-    org_map = get_org_list()
-    org_list = list(org_map.keys())
-
     st.sidebar.multiselect(
         "What Organizations is this character associated with?",
-        org_list,
+        ["test1", "test2", "test3"],
     )
 
     st.title("Character Generator")

@@ -1,0 +1,13 @@
+LICENSE
+README.md
+setup.py
+src/char_gen/__init__.py
+src/char_gen/base.py
+src/char_gen/utils.py
+src/char_gen.egg-info/PKG-INFO
+src/char_gen.egg-info/SOURCES.txt
+src/char_gen.egg-info/dependency_links.txt
+src/char_gen.egg-info/top_level.txt
+src/char_gen/entity/__init__.py
+src/char_gen/entity/character.py
+src/char_gen/entity/organization.py

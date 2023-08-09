@@ -1,5 +1,5 @@
 from typing import Union
-from src.base import Kanka
+from char_gen.base import Kanka
 
 
 class Organization:
@@ -32,5 +32,10 @@ class Organization:
         return resp
 
     def getOrgList(self):
-        resp = Kanka.get("organizations")
+        resp = Kanka.get("organisations")
         return resp
+
+
+if __name__ == "__main__":
+    org = Organization()
+    org.getOrgList()
