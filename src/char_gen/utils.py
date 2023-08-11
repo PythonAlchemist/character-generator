@@ -5,13 +5,15 @@ import re
 
 def safe_response(response: requests.Response) -> dict:
     # check for 404
-    if response.status_code == 200:
+    if response.status_code == 200 or 201:
         resp = response.json()
         resp = resp["data"]
         return resp
     elif response.status_code == 404:
         raise Exception(f"{response.request.path_url} not found")
     else:
+        print(response.status_code)
+        print(response.json())
         raise Exception("broke")
 
 

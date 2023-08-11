@@ -1,5 +1,5 @@
 from typing import Union, List, Dict, Any
-from char_gen.base import Kanka
+from char_gen.interface.base import Kanka
 from char_gen.entity.core import Entity
 from char_gen.entity.character import Character
 import pandas as pd
@@ -39,6 +39,7 @@ class Organization(Entity):
             "name": self.name,
             "description": self.description,
             "type": self.type,
+            "id": self.id,
         }
 
 

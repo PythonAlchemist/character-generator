@@ -1,115 +1,121 @@
 import streamlit as st
+import pandas as pd
+import os
+import json
+
 from src.char_gen.entity.character import Character
 from src.char_gen.entity.organization import Organization
 from src.char_gen.entity.location import Location
-import pandas as pd
-import os
-
-# load lists
-resp = Organization.getEntityList()
-org_map = {}
-for org in resp:
-    org_map[org["name"]] = org["id"]
-
-resp = Location.getEntityList()
-location_map = {}
-for location in resp:
-    location_map[location["name"]] = location["id"]
-
-# packet
-packet = {
-    "location": None,
-    "organization": None,
-    "prompt": None,
-}
+from char_gen.models.open_ai_generator import OpenAIGenerator
 
 
-# Function to display and edit character details
-def edit_character(char):
-    char.name = st.text_input("Name", char.name)
-    if char.age is not None:
-        char.age = st.number_input("Age", min_value=0, value=char.age)
-    else:
-        char.age = st.number_input("Age", min_value=0)
-    char.description = st.text_area("Description", char.description)
-    char.title = st.text_input("Title", char.title)
-    char.type = st.text_input("Type", char.type)
-    char.sex = st.text_input("Sex", char.sex)
-    char.race = st.text_input("Race", char.race)
-    char.family = st.text_input("Family", char.family)
-    char.location = st.text_input("Location", char.location)
+def load_entity_list(entity_cls):
+    resp = entity_cls.getEntityList()
+    return {entity["name"]: entity["id"] for entity in resp}
 
 
-def collect_pregen_data(org_sel, loc_sel):
-    members = []
-    members_resp = Organization.getAllMembers(org_map[org_sel]) if org_sel else []
-    for member in members_resp:
-        members.append(member)
+def edit_character(character):
+    character.name = st.text_input("Name", character.name)
+    character.age = st.text_input("Age", character.age)
+    character.description = st.text_area("Description", character.description)
+    character.backstory = st.text_area("Backstory", character.backstory)
+    character.title = st.text_input("Title", character.title)
+    character.type = st.text_input("Type", character.type)
+    character.sex = st.text_input("Sex", character.sex)
+    character.race = st.text_input("Race", character.race)
+    character.family = st.text_input("Family", character.family)
+    character.location = st.text_input("Location", character.location)
 
-    loc_json = Location(id=location_map[loc_sel]).promptPackage() if loc_sel else None
-    org_json = Organization(id=org_map[org_sel]).promptPackage() if org_sel else None
+
+def collect_pregen_data(org_selected, loc_selected):
+    members = Organization.getAllMembers(org_map[org_selected]) if org_selected else []
+    location = (
+        Location(id=location_map[loc_selected]).promptPackage()
+        if loc_selected
+        else None
+    )
+    organization = (
+        Organization(id=org_map[org_selected]).promptPackage() if org_selected else None
+    )
     members_json = [member.promptPackage() for member in members]
 
-    return loc_json, org_json, members_json
+    return location, organization, members_json
 
 
-# Streamlit app
 def main():
-    pregen = False
-
     st.sidebar.title("Pregen Parameters")
 
-    # define organizations character is associated with
-    org_sel = st.sidebar.selectbox(
-        "What Organizations is this character associated with?",
-        list(org_map.keys()),
-    )
+    # Check if the variables already exist in the session state
+    if "org_selected" not in st.session_state:
+        st.session_state.org_selected = st.sidebar.selectbox(
+            "What Organizations is this character associated with?",
+            list(org_map.keys()),
+        )
+    else:
+        st.session_state.org_selected = st.sidebar.selectbox(
+            "What Organizations is this character associated with?",
+            list(org_map.keys()),
+            index=list(org_map.keys()).index(st.session_state.org_selected),
+        )
 
-    # define locations character is associated with
-    loc_sel = st.sidebar.selectbox(
-        "What Locations is this character associated with?",
-        list(location_map.keys()),
-    )
+    if "loc_selected" not in st.session_state:
+        st.session_state.loc_selected = st.sidebar.selectbox(
+            "What Locations is this character associated with?",
+            list(location_map.keys()),
+        )
+    else:
+        st.session_state.loc_selected = st.sidebar.selectbox(
+            "What Locations is this character associated with?",
+            list(location_map.keys()),
+            index=list(location_map.keys()).index(st.session_state.loc_selected),
+        )
 
-    # define prompt
-    text = st.sidebar.text_area(
-        "Prompt",
-        placeholder="This is your chance to inform the models about anything you want about the new character.",
+    prompt_text = st.sidebar.text_area(
+        "Prompt", placeholder="Inform the models about the new character."
     )
 
     if st.sidebar.button("Collect Pregen Data"):
+        st.session_state.data_packet = {}
         (
-            packet["location"],
-            packet["organization"],
-            packet["prompt"],
-        ) = collect_pregen_data(org_sel, loc_sel)
-        pregen = True
+            st.session_state.data_packet["location"],
+            st.session_state.data_packet["organization"],
+            st.session_state.data_packet["members"],
+        ) = collect_pregen_data(
+            st.session_state.org_selected, st.session_state.loc_selected
+        )
+        st.session_state.data_packet["prompt"] = prompt_text
 
     st.title("Character Generator")
 
-    char = Character()
+    generator = OpenAIGenerator()
 
-    if pregen:
-        st.write("Organization Data:")
-        st.write(packet["organization"])
-        st.write("Location Data:")
-        st.write(packet["location"])
-        st.write("Prompt Data:")
-        st.write(packet["prompt"])
+    if "data_packet" in st.session_state:
+        for key, value in st.session_state.data_packet.items():
+            st.write(f"{key.capitalize()} Data:")
+            st.write(value)
 
-    # Check if the image file exists
-    image_path = "character_image.jpg"
+    if st.button("Generate Character"):
+        with open("prompt.json", "w") as file:
+            file.write(json.dumps(st.session_state.data_packet))
+        response = generator.generate(st.session_state.data_packet)
+        st.session_state.char = Character(props=response)
+
+    if "char" in st.session_state:
+        edit_character(st.session_state.char)
+
+    if st.button("Update"):
+        st.session_state.char.upload()
+        st.write("Character Updated!")
+
+
+def display_character_image(image_path):
     if os.path.exists(image_path):
         st.image(image_path, use_column_width=True)
     else:
         st.write("Image not found")
 
-    edit_character(char)
-
-    if st.button("Update"):
-        # TODO: Use the to update kanka
-        st.write("Character Updated!")
-
 
 if __name__ == "__main__":
+    org_map = load_entity_list(Organization)
+    location_map = load_entity_list(Location)
     main()

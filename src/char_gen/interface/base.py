@@ -22,28 +22,17 @@ class Kanka:
     assert CAMPAIGN_ID is not None, "Campaign ID not found"
 
     def get(url: str) -> dict:
-        response = requests.get(
-            f"{BASE_URL}/{url}",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {API_KEY}",
-            },
-        )
+        response = requests.get(f"{BASE_URL}/{url}", headers=HEADER)
         return safe_response(response)
 
-    def getOrganizations(self):
-        url = f"{self.base_url}/organisations"
-        response = requests.get(url, headers=HEADER).json()
-        data = response["data"]
-        orgs = [
-            {
-                "name": x["name"],
-                "id": x["id"],
-                "members": [y["character_id"] for y in x["members"]],
-            }
-            for x in data
-        ]
-        return orgs
+    def post(url: str, payload: dict) -> dict:
+        response = requests.post(
+            f"{BASE_URL}/{url}",
+            headers=HEADER,
+            data=json.dumps(payload),
+        )
+        print(response.json())
+        return safe_response(response)
 
 
 if __name__ == "__main__":

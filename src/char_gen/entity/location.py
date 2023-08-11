@@ -1,5 +1,5 @@
 from typing import Union
-from char_gen.base import Kanka
+from char_gen.interface.base import Kanka
 from char_gen.entity.core import Entity
 
 
