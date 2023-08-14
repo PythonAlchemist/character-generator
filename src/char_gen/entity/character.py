@@ -42,11 +42,11 @@ class Character(Entity):
     def upload(
         self,
     ):
+        """Uploads the character to Kanka."""
+
         def format_html(description, background):
             formatted_string = f"<b>Description:</b><br>{description}<br><br><b>Background:</b><br>{background}"
             return formatted_string
-
-        """Uploads the character to Kanka."""
 
         payload = {
             "name": self.name,
@@ -90,9 +90,6 @@ class Character(Entity):
             "organisation_id": org_id,
             "role": self.organization_role,
             "is_private": False,
-            # "pin_id": None,
-            # "status_id": 0,
-            # "parent_id": None,
         }
         resp = Kanka.post(
             f"organisations/{org_id}/organisation_members", payload=payload

@@ -3,13 +3,12 @@ import os
 import json
 from typing import Union
 from dotenv import load_dotenv, find_dotenv
-
 from char_gen.entity.location import Location
 from char_gen.entity.organization import Organization
 from char_gen.entity.character import Character
+from char_gen.utils import num_tokens_from_messages
 
 load_dotenv(find_dotenv())
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
@@ -65,8 +64,17 @@ class OpenAiGenerator:
         "
         self.conversation_history.append({"role": "user", "content": prompt})
 
+        # a little slow
+        token_estimate = num_tokens_from_messages(
+            self.conversation_history, "gpt-3.5-turbo"
+        )
+        if token_estimate < 3800:
+            model = "gpt-3.5-turbo"
+        else:
+            model = "gpt-3.5-turbo-16k"
+
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # The chat model to use
+            model=model,
             messages=self.conversation_history,
         )
         return json.loads(response.choices[0].message["content"])
@@ -113,10 +121,10 @@ if __name__ == "__main__":
     ] = "Create another druid in the circle. They should be a medium to high level with decent reputation."
     resp = gen.generate_character(query)
     char = Character(props=resp)
+    char.location_id = 1112563
     resp2 = char.upload()
     # update the character with the id
     char.id = resp2["id"]
-    char.location_id = 1112563
     char.linkToOrganization(237897)
     # char.delete()
     print(resp)
