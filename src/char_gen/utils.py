@@ -9,6 +9,8 @@ def safe_response(response: requests.Response) -> dict:
         resp = response.json()
         resp = resp["data"]
         return resp
+    elif response.status_code == 204:
+        return {}
     elif response.status_code == 404:
         raise Exception(f"{response.request.path_url} not found")
     else:

@@ -1,16 +1,40 @@
 import openai
 import os
 import json
+from typing import Union
 from dotenv import load_dotenv, find_dotenv
+
+from char_gen.entity.location import Location
+from char_gen.entity.organization import Organization
+from char_gen.entity.character import Character
 
 load_dotenv(find_dotenv())
 
-API_KEY = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 class OpenAiGenerator:
     def __init__(self):
         self.conversation_history = []
+
+    @staticmethod
+    def collect_context(
+        location: Union[int, None] = None, organization: Union[int, None] = None
+    ) -> dict:
+        if location:
+            loc_content = Location(id=location).promptPackage()
+        if organization:
+            org_content = Organization(id=organization).promptPackage()
+
+            members = Organization.getAllMembers(organization)
+            member_content = [member.promptPackage() for member in members]
+
+        context = {
+            "location": loc_content if loc_content else None,
+            "organization": org_content if org_content else None,
+            "members": member_content if member_content else None,
+        }
+        return context
 
     def generate_character(self, query: dict):
         # reset
@@ -30,9 +54,9 @@ class OpenAiGenerator:
         \n\n \
         Format: \
         return a json object with the following fields: \
-        name: name of the character \
-        description: description of the character \
-        backstory: backstory of the character \
+        name: name of the character (first and last) \
+        description: description of the characters apperance \
+        backstory: backstory for the character, a paragraph or two \
         race: race of the character (keep dnd 5e races in mind) \
         age: age of the character \
         title: title of the character \
@@ -83,5 +107,16 @@ if __name__ == "__main__":
         "prompt": "Create another druid in the circle. They should be a medium to high level with decent reputation.",
     }
 
-    resp = gen.generate_character(test_query)
+    query = gen.collect_context(location=1112563, organization=237897)
+    query[
+        "prompt"
+    ] = "Create another druid in the circle. They should be a medium to high level with decent reputation."
+    resp = gen.generate_character(query)
+    char = Character(props=resp)
+    resp2 = char.upload()
+    # update the character with the id
+    char.id = resp2["id"]
+    char.location_id = 1112563
+    char.linkToOrganization(237897)
+    # char.delete()
     print(resp)

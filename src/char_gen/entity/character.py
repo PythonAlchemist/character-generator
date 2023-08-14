@@ -4,6 +4,7 @@ from char_gen.entity.core import Entity
 from char_gen.utils import extract_human_readable_text
 import pandas as pd
 import json
+import requests
 
 
 class Character(Entity):
@@ -19,7 +20,10 @@ class Character(Entity):
         self.race: Union[str, None] = None
         self.family: Union[str, None] = None
         self.location: Union[str, None] = None
+        self.location_id: Union[int, None] = None
         self.organizations: Union[list, None] = None
+        self.organizations_id: list = []
+        self.organization_role: Union[str, None] = None
         self.tags: Union[list, None] = None
         self.is_dead: bool = False
 
@@ -35,15 +39,64 @@ class Character(Entity):
         df = pd.DataFrame([self.__dict__])
         return df
 
-    def upload(self):
-        payload = self.promptPackage()
+    def upload(
+        self,
+    ):
+        def format_html(description, background):
+            formatted_string = f"<b>Description:</b><br>{description}<br><br><b>Background:</b><br>{background}"
+            return formatted_string
 
-        # adjust payload keys
-        payload["entry"] = self.description + "\n\n" + self.backstory
-        del payload["description"]
-        del payload["backstory"]
+        """Uploads the character to Kanka."""
+
+        payload = {
+            "name": self.name,
+            "entry": format_html(self.description, self.backstory),
+            "title": self.title,
+            "age": self.age,
+            "sex": self.sex,
+            "pronouns": None,
+            "type": "NPC",
+            "families": [],
+            "location_id": self.location_id,
+            "races": [],
+            "tags": [],
+            "is_dead": self.is_dead,
+            "is_private": False,
+            "imgage_url": None,
+            "entity_image_uuid": None,
+            "entity_header_uuid": None,
+            "personality_name": [],
+            "personality_entry": [],
+            "appearance_name": [],
+            "appearance_entry": [],
+            "is_personality_visible": True,
+            "is_personality_pinned": False,
+            "is_appearance_pinned": False,
+        }
 
         resp = Kanka.post("characters", payload=payload)
+
+        return resp
+
+    def delete(self):
+        """Deletes the character from Kanka."""
+        resp = Kanka.delete(f"characters/{self.id}")
+        return resp
+
+    def linkToOrganization(self, org_id: int) -> requests.Response:
+        """Links the character to an organization."""
+        payload = {
+            "character_id": self.id,
+            "organisation_id": org_id,
+            "role": self.organization_role,
+            "is_private": False,
+            # "pin_id": None,
+            # "status_id": 0,
+            # "parent_id": None,
+        }
+        resp = Kanka.post(
+            f"organisations/{org_id}/organisation_members", payload=payload
+        )
         return resp
 
     @staticmethod

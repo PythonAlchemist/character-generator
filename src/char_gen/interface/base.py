@@ -25,6 +25,10 @@ class Kanka:
         response = requests.get(f"{BASE_URL}/{url}", headers=HEADER)
         return safe_response(response)
 
+    def delete(url: str) -> dict:
+        response = requests.delete(f"{BASE_URL}/{url}", headers=HEADER)
+        return safe_response(response)
+
     def post(url: str, payload: dict) -> dict:
         response = requests.post(
             f"{BASE_URL}/{url}",
