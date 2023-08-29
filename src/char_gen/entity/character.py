@@ -129,4 +129,4 @@ if __name__ == "__main__":
     }
 
     char1 = Character(props=resp)
-    char1
+    print(char1)

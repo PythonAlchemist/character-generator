@@ -14,6 +14,9 @@ class Location(Entity):
         else:
             self._newEntity(props)
 
+    def __repr__(self) -> str:
+        return f"Location: {self.name} \nDescription: {self.description}"
+
     @staticmethod
     def getEntity(id: int):
         resp = Kanka.get(f"locations/{id}")
@@ -34,4 +37,4 @@ class Location(Entity):
 
 if __name__ == "__main__":
     loc = Location(1112563)
-    a = 6
+    print(loc)
