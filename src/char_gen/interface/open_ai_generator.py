@@ -68,7 +68,8 @@ class OpenAiGenerator:
         token_estimate = num_tokens_from_messages(
             self.conversation_history, "gpt-3.5-turbo"
         )
-        if token_estimate < 3800:
+        # room for ~300 tokens response
+        if token_estimate < 3700:
             model = "gpt-3.5-turbo"
         else:
             model = "gpt-3.5-turbo-16k"
@@ -123,8 +124,4 @@ if __name__ == "__main__":
     char = Character(props=resp)
     char.location_id = 1112563
     resp2 = char.upload()
-    # update the character with the id
-    char.id = resp2["id"]
-    char.linkToOrganization(237897)
-    # char.delete()
-    print(resp)
+    print(resp2)

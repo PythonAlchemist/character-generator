@@ -118,15 +118,18 @@ class Character(Entity):
 
 
 if __name__ == "__main__":
-    resp = {
-        "name": "Elysia",
-        "description": "Elysia is a graceful and ethereal figure, embodying the beauty and magic of the Moonshadow Grove. Standing at an average height, she carries herself with an air of quiet confidence. Her skin is fair and radiant, glowing softly in the moonlight. Cascading down her back is a mane of silver-white hair, adorned with delicate flowers and intertwined with subtle vines. Elysia's eyes are a mesmerizing shade of pale blue, shimmering with a deep wisdom and a hint of moonlit magic. Her voice is melodic and soothing, resonating with the calm energy of the grove. She possesses an aura of serenity, and animals are drawn to her calming presence.",
-        "backstory": "Elysia was a wanderer before she discovered Moonshadow Grove. Drawn by the whispers of ancient spirits, she found solace and purpose in the grove's serene beauty. Under the guidance of Davnan, she honed her druidic abilities and developed a profound connection with the lunar cycle. Elysia quickly gained a reputation among the Moon Druids for her exceptional skill in harnessing the energy of the moon and communing with nature spirits. Her deep respect for the balance of nature and her unwavering dedication to preserving it have earned her the trust and admiration of her fellow druids.",
-        "age": "126",
-        "title": "Lunar Guardian",
-        "race": "Elf",
-        "sex": "Female",
-    }
+    char = Character(id=1235133)
+    print(char)
+    print(char.toDF())
+    # resp = {
+    #     "name": "Elysia",
+    #     "description": "Elysia is a graceful and ethereal figure, embodying the beauty and magic of the Moonshadow Grove. Standing at an average height, she carries herself with an air of quiet confidence. Her skin is fair and radiant, glowing softly in the moonlight. Cascading down her back is a mane of silver-white hair, adorned with delicate flowers and intertwined with subtle vines. Elysia's eyes are a mesmerizing shade of pale blue, shimmering with a deep wisdom and a hint of moonlit magic. Her voice is melodic and soothing, resonating with the calm energy of the grove. She possesses an aura of serenity, and animals are drawn to her calming presence.",
+    #     "backstory": "Elysia was a wanderer before she discovered Moonshadow Grove. Drawn by the whispers of ancient spirits, she found solace and purpose in the grove's serene beauty. Under the guidance of Davnan, she honed her druidic abilities and developed a profound connection with the lunar cycle. Elysia quickly gained a reputation among the Moon Druids for her exceptional skill in harnessing the energy of the moon and communing with nature spirits. Her deep respect for the balance of nature and her unwavering dedication to preserving it have earned her the trust and admiration of her fellow druids.",
+    #     "age": "126",
+    #     "title": "Lunar Guardian",
+    #     "race": "Elf",
+    #     "sex": "Female",
+    # }
 
     char1 = Character(props=resp)
     print(char1)

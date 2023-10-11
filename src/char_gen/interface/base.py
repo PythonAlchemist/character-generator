@@ -35,13 +35,4 @@ class Kanka:
             headers=HEADER,
             data=json.dumps(payload),
         )
-        print(response.json())
         return safe_response(response)
-
-
-if __name__ == "__main__":
-    kanka = Kanka()
-    orgs = kanka.getOrganizations()
-    print(orgs)
-    # for char in orgs[0]["members"]:
-    #     print(kanka.getCharacter(char))
